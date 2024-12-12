@@ -2,119 +2,84 @@ using UnityEngine;
 
 public class FollowerMovement : MonoBehaviour
 {
-    public Transform target; // The player to follow
+    public Transform target; // The leader to follow
     public float followSpeed = 4f; // Speed for following the target
-    public float stopDistance = 1f; // Distance to stop moving
-    public float jumpDelayFactor = 0.5f; // Factor to calculate delay based on speed
-
-    public Animator animator;
-    public SpriteRenderer spriteRenderer;
-
-    public LayerMask groundLayer; // LayerMask to detect the ground
-    public Transform groundCheck; // Position to check if grounded
-    public float groundCheckRadius = 0.2f; // Radius of the ground check
+    public float stopDistance = 1f; // Minimum distance to stop
+    public float followDelay = 0.2f; // Delay for smoother following
+    public LayerMask groundLayer; // Layer for ground detection
+    public Transform groundCheck; // Check for ground
+    public float groundCheckRadius = 0.2f; // Radius for ground detection
+    public float movementThreshold = 0.01f; // Minimum movement to consider the follower "moving"
 
     private Rigidbody rb;
-    private bool isGrounded;
-    private bool jumpTriggered = false; // To manage delayed jumping
+    private Animator animator;
 
-    private Vector3 lastTargetPosition;
-    private float targetSpeed;
+    private Vector3 idleDirection = Vector3.zero; // Last movement direction for idling
+    private Vector3 lastPosition; // Tracks the last position to calculate movement
+    private bool isGrounded;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        lastTargetPosition = target.position;
+        animator = GetComponentInChildren<Animator>();
+        lastPosition = transform.position; // Initialize last position
     }
 
     void Update()
     {
-        // Update target's speed
-        targetSpeed = (target.position - lastTargetPosition).magnitude / Time.deltaTime;
-        lastTargetPosition = target.position;
-
-        // Ground check
+        // Check if grounded
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // Follow the target
+        // Update Animator parameters for idle direction
+        if (!animator.GetBool("isWalking"))
+        {
+            animator.SetFloat("idleX", idleDirection.x);
+            animator.SetFloat("idleZ", idleDirection.z);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // Follow the leader
         FollowTarget();
 
-        // Handle jumping
-        if (jumpTriggered && isGrounded)
+        // Detect movement
+        Vector3 positionDelta = transform.position - lastPosition;
+        if (positionDelta.magnitude > movementThreshold)
         {
-            PerformJump();
+            animator.SetBool("isWalking", true); // Follower is moving
         }
+        else
+        {
+            animator.SetBool("isWalking", false); // Follower is idle
+        }
+
+        // Update last position
+        lastPosition = transform.position;
     }
 
     private void FollowTarget()
     {
         Vector3 direction = target.position - transform.position;
-        direction.y = 0; // Ignore height differences for movement
 
         if (direction.magnitude > stopDistance)
         {
-            Vector3 move = direction.normalized * followSpeed;
-            rb.linearVelocity = new Vector3(move.x, rb.linearVelocity.y, move.z);
+            // Move towards the leader
+            Vector3 move = direction.normalized * followSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + move);
 
-            // Update animation
-            UpdateAnimation(move);
+            // Update Animator parameters for movement
+            animator.SetFloat("moveX", direction.normalized.x);
+            animator.SetFloat("moveZ", direction.normalized.z);
+
+            // Update idle direction based on movement
+            idleDirection = direction.normalized;
         }
         else
         {
-            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
-            animator.SetFloat("Speed", 0);
-        }
-    }
-
-    public void OnLeaderJump(Vector3 jumpStartPosition)
-    {
-        Debug.Log($"Follower notified of leader's jump at position {jumpStartPosition}");
-
-        if (!jumpTriggered && isGrounded) // Prevent duplicate jump triggers
-        {
-            float jumpDelay = jumpDelayFactor / Mathf.Max(targetSpeed, 1f);
-            Debug.Log($"Jump delay calculated: {jumpDelay}");
-            Invoke(nameof(TriggerJump), jumpDelay);
-        }
-    }
-
-    private void TriggerJump()
-    {
-        Debug.Log("Follower preparing to jump!");
-        jumpTriggered = true;
-    }
-
-    private void PerformJump()
-    {
-        Debug.Log("Follower is jumping!");
-        rb.AddForce(Vector3.up * 7f, ForceMode.Impulse); // Adjust force as needed
-        jumpTriggered = false;
-
-        // Play jump animation
-        animator.Play("Jump");
-    }
-
-    private void UpdateAnimation(Vector3 move)
-    {
-        animator.SetFloat("Speed", move.magnitude);
-
-        if (move.x > 0)
-        {
-            animator.Play("WalkRight");
-            spriteRenderer.flipX = false;
-        }
-        else if (move.x < 0)
-        {
-            animator.Play("WalkLeft");
-            spriteRenderer.flipX = true;
-        }
-        else if (move.z > 0)
-        {
-            animator.Play("WalkUp");
-        }
-        else if (move.z < 0)
-        {
-            animator.Play("WalkDown");
+            // Stop movement and reset Animator parameters
+            animator.SetFloat("moveX", 0);
+            animator.SetFloat("moveZ", 0);
         }
     }
 
