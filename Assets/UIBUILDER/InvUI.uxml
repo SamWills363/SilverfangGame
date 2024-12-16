@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UIBUILDER/INVSTYLE.uss?fileID=7433441132597879392&amp;guid=191dfe8506a3188449d1752c4b5c0f5b&amp;type=3#INVSTYLE" />
+    <ui:VisualElement name="CONTAINER" style="flex-grow: 1; align-items: center; justify-content: center; border-left-color: rgba(29, 29, 29, 0); border-right-color: rgba(29, 29, 29, 0); border-top-color: rgba(29, 29, 29, 0); border-bottom-color: rgba(29, 29, 29, 0);">
+        <ui:VisualElement name="HEADER" style="flex-grow: 1; flex-direction: row; height: 100px; max-height: 150px; min-height: 100px; margin-top: 10px; margin-right: 10px; margin-bottom: 0; margin-left: 0; border-bottom-color: rgba(255, 124, 0, 0); border-left-width: 1px;">
+            <ui:Label text="INVENTORY" name="Headertext" class="header_main" />
+            <ui:VisualElement name="Container_Level" style="flex-grow: 1; flex-direction: row; justify-content: center; margin-bottom: 10px;">
+                <ui:Label text="30" name="Level_Value" class="header_main" />
+                <ui:VisualElement name="Container_Level_Bar" style="flex-grow: 1;">
+                    <ui:Label text="LEVEL" name="Header" style="font-size: 18px;" />
+                    <ui:VisualElement name="Bar_Outer" style="flex-grow: 1; width: 250px; height: 100px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="BODY" style="flex-grow: 1; flex-direction: row-reverse; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
+    </ui:VisualElement>
+</ui:UXML>

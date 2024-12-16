@@ -7,12 +7,6 @@ public class PAUSE : MonoBehaviour
     public GameObject optionsMenu;
     private bool pausestate = false;
 
-    void Start()
-    {
-
-    }
-
-
     void Update()
     {
 

@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      CombatBasePuppetNormMmergedTest_0001s_0005s_0000s_0001_Layer-28-Copy_0: -1950886426885210351
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
