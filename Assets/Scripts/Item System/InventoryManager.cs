@@ -30,4 +30,20 @@ public class InventoryManager : MonoBehaviour
     {
         item.Use();
     }
+
+    public void UseSkill(CharacterSO character, SkillSO skill)
+    {
+        if (character.isReady && skill.type == SkillSO.SkillType.Active)
+        {
+            Debug.Log($"{character.characterName} uses {skill.itemName}");
+            character.atbGauge = 0; // Reset gauge
+        }
+    }
+
+    public void EquipWeapon(WeaponSO weapon)
+    {
+        Debug.Log($"Equipping weapon: {weapon.itemName}");
+        weapon.Use();
+    }
+
 }
