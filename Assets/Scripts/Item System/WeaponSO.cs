@@ -10,6 +10,7 @@ public class WeaponSO : InventoryItemSO
     public SkillSO customSkill; // Custom skill (optional)
     public float attackSpeed; // Determines how fast the weapon can attack
     public float weight; // Affects character mobility or stamina drain
+    
 
     public override void Use()
     {
