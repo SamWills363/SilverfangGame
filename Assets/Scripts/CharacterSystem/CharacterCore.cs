@@ -43,6 +43,10 @@ public class CharacterCore : MonoBehaviour
     private int wisdom;
     private int charisma;
 
+    // Health system
+    private float currentHP;
+    private float maxHP;
+
     private void Awake()
     {
         if (characterData == null)
@@ -87,14 +91,10 @@ public class CharacterCore : MonoBehaviour
         wisdom = characterData.wisdom;
         charisma = characterData.charisma;
 
-        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}");
+        maxHP = characterData.maxHP;
+        currentHP = maxHP;
 
-        // Commented levers for future implementations:
-        // SetHealth(characterData.maxHealth);
-        // SetSpeed(characterData.speed);
-
-        // Example placeholder for setting animator parameters:
-        // animator.SetFloat("Speed", characterData.speed);
+        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHP}/{maxHP}");
     }
 
     public int CalculateSkillCheck(string skill)
@@ -133,6 +133,68 @@ public class CharacterCore : MonoBehaviour
     private int GetModifier(int stat)
     {
         return (stat - 10) / 2;
+    }
+
+    public void StatChange(AttributeSO[] stats)
+    {
+        foreach (var stat in stats)
+        {
+            switch (stat.type)
+            {
+                case AttributeSO.AttributeType.Stat:
+                    ApplyStatModification(stat);
+                    break;
+                case AttributeSO.AttributeType.Trait:
+                    ApplyTraitModification(stat);
+                    break;
+                case AttributeSO.AttributeType.Condition:
+                    ApplyConditionModification(stat);
+                    break;
+                default:
+                    Debug.LogWarning($"Unknown stat type: {stat.type}");
+                    break;
+            }
+        }
+    }
+
+    private void ApplyStatModification(AttributeSO stat)
+    {
+        switch (stat.itemName.ToLower())
+        {
+            case "strength":
+                strength += Mathf.RoundToInt(stat.value);
+                break;
+            case "dexterity":
+                dexterity += Mathf.RoundToInt(stat.value);
+                break;
+            case "constitution":
+                constitution += Mathf.RoundToInt(stat.value);
+                break;
+            case "intelligence":
+                intelligence += Mathf.RoundToInt(stat.value);
+                break;
+            case "wisdom":
+                wisdom += Mathf.RoundToInt(stat.value);
+                break;
+            case "charisma":
+                charisma += Mathf.RoundToInt(stat.value);
+                break;
+            default:
+                Debug.LogWarning($"Unknown stat name: {stat.itemName}");
+                break;
+        }
+    }
+
+    private void ApplyTraitModification(AttributeSO trait)
+    {
+        Debug.Log($"Applying trait: {trait.itemName} with value {trait.value}");
+        // Implement trait-specific logic here
+    }
+
+    private void ApplyConditionModification(AttributeSO condition)
+    {
+        Debug.Log($"Applying condition: {condition.itemName} with value {condition.value}");
+        // Implement condition-specific logic here
     }
 
     private void Update()

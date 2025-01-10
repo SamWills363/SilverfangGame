@@ -7,11 +7,16 @@ public class DirectLineMovement : MonoBehaviour
     public float jumpHeight = 5f; // Height of the jump
     public float gravity = 9.81f; // Gravity to pull the GameObject down
     public bool enableGravity = true; // Toggle gravity on/off
-    
+
+    [Header("Target Object")]
+    public GameObject targetObject; // The GameObject to move
+
     private Vector3 targetPosition;
     private bool isMoving = false;
     private bool isJumping = false;
     private float verticalVelocity = 0f; // Vertical velocity for jumping and falling
+
+    private bool hasMoved = false;
 
     void Update()
     {
@@ -32,14 +37,16 @@ public class DirectLineMovement : MonoBehaviour
     /// <param name="position">The target position to move towards, including jump height.</param>
     public void StartMovement(Vector3 position)
     {
-        targetPosition = position;
+        if (hasMoved || targetObject == null) {
+            return;
+        }
 
-        if (position.y > transform.position.y)
+        targetPosition = position;
+        
+        if (position.y > targetObject.transform.position.y)
         {
             StartJump(position.y);
         }
-
-        isMoving = true;
     }
 
     /// <summary>
@@ -47,15 +54,23 @@ public class DirectLineMovement : MonoBehaviour
     /// </summary>
     private void MoveToTarget()
     {
-        // Move horizontally (XZ plane)
-        Vector3 horizontalTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-        transform.position = Vector3.MoveTowards(transform.position, horizontalTarget, moveSpeed * Time.deltaTime);
+        if (hasMoved || targetObject == null) {
+            hasMoved = false;
+            return;
+        }
 
+        // Move horizontally (XZ plane)
+        Vector3 horizontalTarget = new Vector3(targetPosition.x, targetObject.transform.position.y, targetPosition.z);
+        targetObject.transform.position = Vector3.MoveTowards(targetObject.transform.position, horizontalTarget, moveSpeed * Time.deltaTime);
+
+        Debug.Log("Unit is moving to " + targetObject.transform.position);
         // Stop horizontal movement when close enough
-        if (Vector3.Distance(transform.position, horizontalTarget) <= 0.1f)
+        if (Vector3.Distance(targetObject.transform.position, horizontalTarget) <= 0.1f)
         {
             isMoving = false;
+            hasMoved = true;
         }
+        return;
     }
 
     /// <summary>
@@ -64,10 +79,10 @@ public class DirectLineMovement : MonoBehaviour
     /// <param name="targetY">The target height for the jump.</param>
     private void StartJump(float targetY)
     {
-        if (!isJumping)
+        if (!isJumping && targetObject != null)
         {
             isJumping = true;
-            verticalVelocity = Mathf.Sqrt(2 * gravity * (targetY - transform.position.y)); // Calculate initial jump velocity
+            verticalVelocity = Mathf.Sqrt(2 * gravity * (targetY - targetObject.transform.position.y)); // Calculate initial jump velocity
         }
     }
 
@@ -76,15 +91,17 @@ public class DirectLineMovement : MonoBehaviour
     /// </summary>
     private void ApplyGravity()
     {
-        if (isJumping || transform.position.y > targetPosition.y)
+        if (targetObject == null) return;
+
+        if (isJumping || targetObject.transform.position.y > targetPosition.y)
         {
             verticalVelocity -= gravity * Time.deltaTime; // Apply gravity
-            transform.position += new Vector3(0, verticalVelocity * Time.deltaTime, 0);
+            targetObject.transform.position += new Vector3(0, verticalVelocity * Time.deltaTime, 0);
 
             // Stop jumping when reaching the ground or target Y position
-            if (transform.position.y <= targetPosition.y)
+            if (targetObject.transform.position.y <= targetPosition.y)
             {
-                transform.position = new Vector3(transform.position.x, targetPosition.y, transform.position.z);
+                targetObject.transform.position = new Vector3(targetObject.transform.position.x, targetPosition.y, targetObject.transform.position.z);
                 verticalVelocity = 0f;
                 isJumping = false;
             }

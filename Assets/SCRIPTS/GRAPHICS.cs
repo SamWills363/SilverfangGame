@@ -7,6 +7,22 @@ public class GRAPHICS : MonoBehaviour
     public TMP_Dropdown ResolutionDropdown;
     
 
+     public void resolutaionSet() {
+          switch (ResolutionDropdown.value) {
+                case 0:
+                     Screen.SetResolution(854, 480, FullScreenMode.FullScreenWindow);
+                     break;
+                case 1:
+                     Screen.SetResolution(1280, 720, FullScreenMode.FullScreenWindow);
+                     break;
+                case 2:
+                     Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow);
+                     break;
+                default:
+                     Debug.Log("Invalid resolution index");
+                     break;
+          }
+     }
 
     public void resolutionSet(){
         if (ResolutionDropdown.value == 0 & FullscreenDropdown.value == 0){
