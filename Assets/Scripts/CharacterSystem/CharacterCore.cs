@@ -9,16 +9,10 @@ public class CharacterCore : MonoBehaviour
     public CharacterSO characterData;
 
     [Header("Audio Configuration")]
-    [Tooltip("List of sounds this character can play.")]
     public AudioClip[] soundClips;
 
-    // Animator reference
     private Animator animator;
-
-    // Audio source reference
     private AudioSource audioSource;
-
-    // Rigidbody reference for movement
     private Rigidbody rb;
 
     [Header("Movement Configuration")]
@@ -32,47 +26,35 @@ public class CharacterCore : MonoBehaviour
     private float lastMoveX = 0f;
     private float lastMoveZ = 0f;
 
-    // State to determine if the character is in combat
     private bool isInCombat;
+    private bool isDead = false; // Added death state flag
 
     // Character stats
-    private int strength;
-    private int dexterity;
-    private int constitution;
-    private int intelligence;
-    private int wisdom;
-    private int charisma;
+    private int strength, dexterity, constitution, intelligence, wisdom, charisma;
 
-    // Health system
-    private float currentHP;
-    private float maxHP;
+    // Health System
+    [Header("Health System")]
+    public float maxHealth; // Character's maximum health
+    private float currentHealth; // Character's current health
+
+    // **Public Property for Hurtbox Access**
+    public float Health => currentHealth;
 
     private void Awake()
     {
         if (characterData == null)
         {
-            Debug.LogError("CharacterCore: No CharacterSO assigned! Assign a CharacterSO to configure this character.", this);
+            Debug.LogError("CharacterCore: No CharacterSO assigned!", this);
             return;
         }
 
         animator = GetComponent<Animator>();
-        if (animator == null)
-        {
-            Debug.LogError("CharacterCore: Animator component missing! Ensure an Animator is attached.", this);
-            return;
-        }
-
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            Debug.LogError("CharacterCore: AudioSource component missing! Ensure an AudioSource is attached.", this);
-            return;
-        }
-
         rb = GetComponent<Rigidbody>();
-        if (rb == null)
+
+        if (animator == null || audioSource == null || rb == null)
         {
-            Debug.LogError("CharacterCore: Rigidbody component missing! Ensure a Rigidbody is attached.", this);
+            Debug.LogError("CharacterCore: Missing required components!", this);
             return;
         }
 
@@ -83,7 +65,6 @@ public class CharacterCore : MonoBehaviour
     {
         Debug.Log($"Initializing character: {characterData.characterName}");
 
-        // Initialize stats from CharacterSO
         strength = characterData.strength;
         dexterity = characterData.dexterity;
         constitution = characterData.constitution;
@@ -91,196 +72,76 @@ public class CharacterCore : MonoBehaviour
         wisdom = characterData.wisdom;
         charisma = characterData.charisma;
 
-        maxHP = characterData.maxHP;
-        currentHP = maxHP;
+        maxHealth = characterData.maxHP;
+        currentHealth = maxHealth; // Set HP to full at start
 
-        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHP}/{maxHP}");
+        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHealth}/{maxHealth}");
     }
 
-    public int CalculateSkillCheck(string skill)
+    public void TakeDamage(float damage)
     {
-        switch (skill.ToLower())
+        if (isDead) return;
+
+        currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ensure HP doesn't go below 0
+        Debug.Log($"{characterData.characterName} took {damage} damage! Remaining HP: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0)
         {
-            case "athletics":
-                return strength + GetModifier(strength);
-            case "acrobatics":
-            case "sleight of hand":
-            case "stealth":
-                return dexterity + GetModifier(dexterity);
-            case "arcana":
-            case "history":
-            case "investigation":
-            case "nature":
-            case "religion":
-                return intelligence + GetModifier(intelligence);
-            case "animal handling":
-            case "insight":
-            case "medicine":
-            case "perception":
-            case "survival":
-                return wisdom + GetModifier(wisdom);
-            case "deception":
-            case "intimidation":
-            case "performance":
-            case "persuasion":
-                return charisma + GetModifier(charisma);
-            default:
-                Debug.LogWarning($"Unknown skill: {skill}");
-                return 0;
+            OnDeath();
         }
     }
 
-    private int GetModifier(int stat)
+    public void Heal(float healAmount)
     {
-        return (stat - 10) / 2;
+        if (isDead) return;
+
+        currentHealth += healAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log($"{characterData.characterName} healed {healAmount}! Current HP: {currentHealth}/{maxHealth}");
     }
 
-    public void StatChange(AttributeSO[] stats)
+    public void OnDeath()
     {
-        foreach (var stat in stats)
+        if (isDead) return;
+        isDead = true;
+
+        Debug.Log($"{characterData.characterName} has died!");
+
+        // Play death animation
+        if (animator != null)
         {
-            switch (stat.type)
+            animator.SetTrigger("Die");
+        }
+
+        // Disable movement and combat
+        isInCombat = false;
+        moveSpeed = 0;
+
+        // Disable all colliders
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        // Disable all scripts except this one
+        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour script in scripts)
+        {
+            if (script != this)
             {
-                case AttributeSO.AttributeType.Stat:
-                    ApplyStatModification(stat);
-                    break;
-                case AttributeSO.AttributeType.Trait:
-                    ApplyTraitModification(stat);
-                    break;
-                case AttributeSO.AttributeType.Condition:
-                    ApplyConditionModification(stat);
-                    break;
-                default:
-                    Debug.LogWarning($"Unknown stat type: {stat.type}");
-                    break;
+                script.enabled = false;
             }
         }
-    }
 
-    private void ApplyStatModification(AttributeSO stat)
-    {
-        switch (stat.itemName.ToLower())
+        // Play death sound if available
+        if (soundClips.Length > 0)
         {
-            case "strength":
-                strength += Mathf.RoundToInt(stat.value);
-                break;
-            case "dexterity":
-                dexterity += Mathf.RoundToInt(stat.value);
-                break;
-            case "constitution":
-                constitution += Mathf.RoundToInt(stat.value);
-                break;
-            case "intelligence":
-                intelligence += Mathf.RoundToInt(stat.value);
-                break;
-            case "wisdom":
-                wisdom += Mathf.RoundToInt(stat.value);
-                break;
-            case "charisma":
-                charisma += Mathf.RoundToInt(stat.value);
-                break;
-            default:
-                Debug.LogWarning($"Unknown stat name: {stat.itemName}");
-                break;
-        }
-    }
-
-    private void ApplyTraitModification(AttributeSO trait)
-    {
-        Debug.Log($"Applying trait: {trait.itemName} with value {trait.value}");
-        // Implement trait-specific logic here
-    }
-
-    private void ApplyConditionModification(AttributeSO condition)
-    {
-        Debug.Log($"Applying condition: {condition.itemName} with value {condition.value}");
-        // Implement condition-specific logic here
-    }
-
-    private void Update()
-    {
-        if (isInCombat)
-        {
-            // Combat-specific movement logic can be added here in the future
-            return;
+            audioSource.PlayOneShot(soundClips[0]);
         }
 
-        // Overworld movement input
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-        movement = new Vector3(moveX, 0f, moveZ).normalized;
-
-        // Ground Check
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-
-        // Update last movement direction
-        if (movement.magnitude > 0)
-        {
-            lastMoveX = moveX;
-            lastMoveZ = moveZ;
-        }
-
-        // Animator Parameters
-        animator.SetBool("isWalking", movement.magnitude > 0);
-        animator.SetBool("isJumping", !isGrounded);
-        animator.SetFloat("moveX", moveX);
-        animator.SetFloat("moveZ", moveZ);
-
-        // Set Idle direction when movement stops
-        if (movement.magnitude == 0)
-        {
-            animator.SetFloat("idleX", lastMoveX);
-            animator.SetFloat("idleZ", lastMoveZ);
-        }
-
-        // Jump Input
-        if (isGrounded && Input.GetButtonDown("Jump"))
-        {
-            rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
-        }
+        // Destroy character after delay or trigger respawn logic
+        Destroy(gameObject, 3f);
     }
-
-    private void FixedUpdate()
-    {
-        if (isInCombat)
-        {
-            // Combat-specific physics logic can be added here in the future
-            return;
-        }
-
-        // Apply Movement
-        if (movement.magnitude > 0)
-        {
-            rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
-        }
-    }
-
-    public bool IsInCombat()
-    {
-        return isInCombat;
-    }
-
-    public void SetCombatState(bool state)
-    {
-        isInCombat = state;
-        animator.SetBool("IsInCombat", isInCombat);
-        Debug.Log($"Character {characterData.characterName} combat state set to: {isInCombat}");
-    }
-
-    public void PlaySound(int index)
-    {
-        if (soundClips == null || soundClips.Length <= index || index < 0)
-        {
-            Debug.LogError("CharacterCore: Invalid sound index or soundClips not assigned.");
-            return;
-        }
-
-        audioSource.PlayOneShot(soundClips[index]);
-        Debug.Log($"Character {characterData.characterName} played sound: {soundClips[index].name}");
-    }
-
-    // Placeholder methods for manipulating character data (to be implemented later):
-    // public void SetHealth(float value) { /* Implementation */ }
-    // public void ModifySpeed(float modifier) { /* Implementation */ }
-    // public void ResetATB() { /* Implementation */ }
 }
