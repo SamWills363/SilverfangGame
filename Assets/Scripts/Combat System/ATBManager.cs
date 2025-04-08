@@ -6,6 +6,7 @@ public class ATBManager : MonoBehaviour
     public List<CharacterCore> characters = new List<CharacterCore>();
     public float globalTimeMultiplier = 1f;
 
+    /*
     private void Update()
     {
         foreach (var character in characters)
@@ -26,4 +27,5 @@ public class ATBManager : MonoBehaviour
         Debug.Log($"{character.characterData.characterName} is ready to act!");
         character.SetReadyState(true);
     }
+    */
 }

@@ -1,4 +1,4 @@
-{
+    {
   "dependencies": {
     "com.aarthificial.typewriter": "https://github.com/aarthificial-gamedev/typewriter.git",
     "com.unity.collab-proxy": "2.6.0",
