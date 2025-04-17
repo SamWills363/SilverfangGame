@@ -141,13 +141,13 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 722313199000614993}
-    m_Position: {x: 350, y: -10, z: 0}
+    m_Position: {x: 350, y: 0, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7998649559208038259}
-    m_Position: {x: 380, y: 50, z: 0}
+    m_Position: {x: 630, y: -40, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -997418468214252612}
-    m_Position: {x: 410, y: 110, z: 0}
+    m_Position: {x: 190, y: 190, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6004336000630560607}
     m_Position: {x: 450, y: 180, z: 0}
@@ -204,7 +204,13 @@ AnimatorController:
   m_PrefabAsset: {fileID: 0}
   m_Name: StickSpriteCombatCapable-Sheet_0
   serializedVersion: 5
-  m_AnimatorParameters: []
+  m_AnimatorParameters:
+  - m_Name: Blend
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
