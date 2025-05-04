@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7015240d49c0e3d44a61435acbcd532a
+guid: faebc084f99d1494093d062512a50466
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6754239384357436178
-    second: Castle_0
+      213: -8939949036213740343
+    second: YoutubeLogo_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Castle_0
+      name: YoutubeLogo_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 816
-        height: 624
+        x: 5
+        y: 77
+        width: 502
+        height: 358
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee40c6fb01f1442a0800000000000000
-      internalID: -6754239384357436178
+      spriteID: 9cc526aa7bbeee380800000000000000
+      internalID: -8939949036213740343
       vertices: []
       indices: 
       edges: []
@@ -173,8 +173,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Castle_0: -6754239384357436178
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
