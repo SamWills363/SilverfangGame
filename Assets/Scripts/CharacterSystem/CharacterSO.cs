@@ -6,6 +6,16 @@ public class CharacterSO : ScriptableObject
     [Header("Character Info")]
     public string characterName;
 
+    [Header("Faction")]
+    [Tooltip("Determines whether the character profile is Friend/Foe/Neutral")]
+    public factions faction;
+
+    public enum factions {
+        Friend,
+        Enemy,
+        Neutral,
+    }
+    
     [Header("Core Stats (D&D-like)")]
     [Tooltip("Strength determines physical power and athletics.")]
     public int strength;
@@ -31,4 +41,6 @@ public class CharacterSO : ScriptableObject
     [Header("Status Flags")]
     [Tooltip("Indicates if the character is ready to act.")]
     public bool isReady => atbGauge >= 100f; // Ready to act when gauge reaches 100
+
+
 }

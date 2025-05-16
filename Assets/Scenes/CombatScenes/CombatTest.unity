@@ -1507,14 +1507,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 339532632}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.42641082, z: 0, w: 0.90452963}
-  m_LocalPosition: {x: 13, y: 1.238, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 73.7, y: 1.238, z: 61.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 967816943}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 50.48, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &339532636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1527,7 +1527,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7904530ef93f939458055dd827040e8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterData: {fileID: 11400000, guid: 7efe656dc8365464bb4f89d1b0dcd2ac, type: 2}
+  characterData: {fileID: 11400000, guid: a0d3e727fbf263649b791587fe02ce5a, type: 2}
   soundClips: []
   moveSpeed: 10
   groundLayer:
@@ -1540,7 +1540,7 @@ MonoBehaviour:
   approachSpeed: 5
   stopRadius: 0
   isDead: 0
-  maxHealth: 0
+  maxHealth: 100
 --- !u!95 &339532637
 Animator:
   serializedVersion: 7
@@ -2224,6 +2224,7 @@ GameObject:
   - component: {fileID: 479698103}
   - component: {fileID: 479698105}
   - component: {fileID: 479698104}
+  - component: {fileID: 479698106}
   m_Layer: 0
   m_Name: StickSpriteCombatCapable-Sheet_0
   m_TagString: Untagged
@@ -2323,6 +2324,18 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &479698106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 479698102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f3ab008049eff947b4269d6eb558d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &494927629
 GameObject:
   m_ObjectHideFlags: 0
@@ -4123,6 +4136,7 @@ GameObject:
   - component: {fileID: 967816943}
   - component: {fileID: 967816945}
   - component: {fileID: 967816944}
+  - component: {fileID: 967816946}
   m_Layer: 0
   m_Name: StickSpriteCombatCapable-Sheet_0
   m_TagString: Untagged
@@ -4222,6 +4236,18 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &967816946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967816942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f3ab008049eff947b4269d6eb558d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1007502343
 GameObject:
   m_ObjectHideFlags: 0
@@ -7636,7 +7662,6 @@ GameObject:
   - component: {fileID: 1977322088}
   - component: {fileID: 1977322090}
   - component: {fileID: 1977322092}
-  - component: {fileID: 1977322091}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -7652,14 +7677,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1977322083}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.14755042, z: 0, w: 0.98905456}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -61.6, y: 1, z: 63.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 479698103}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 16.97, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &1977322086
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7750,18 +7775,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1977322091
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1977322083}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c5acafccf1ff0c4d82b0c546b1fbb27, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1977322092
 MonoBehaviour:
   m_ObjectHideFlags: 0
