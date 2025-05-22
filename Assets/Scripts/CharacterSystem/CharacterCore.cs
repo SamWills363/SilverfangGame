@@ -66,7 +66,9 @@ public class CharacterActions
             this.core = core;
         }
 
-        public void BasicAttack() {
+        public void SelectAttackTarget(CharacterCore targetCore) => core.SetAttackTarget(targetCore);
+
+        public void BasicMeleeAttack() {
             // Grab all valid targets
             var targets = core.Targeting.GetActiveTargets();
 
@@ -89,12 +91,90 @@ public class CharacterActions
                 // Use Strength as damage (you can swap in any formula you like)
                 float damage = core.Stats.Strength; //Temporary!! CHANGE TO DYNAMIC
                 nearestEnemy.TakeDamage(damage);
-                Debug.Log($"{core.characterData.characterName} BasicAttack → " +
+                Debug.Log($"{core.characterData.characterName} BasicMeleeAttack → " +
                         $"{nearestEnemy.characterData.characterName} took {damage} damage!");
             }
             else {
-                Debug.Log($"{core.characterData.characterName} BasicAttack found no enemies!");
+                Debug.Log($"{core.characterData.characterName} BasicMeleeAttack found no enemies!");
             }
+        }
+
+        public void RangedAttack() {
+            CharacterCore foe = core.AttackTarget ?? FindNearestEnemy();
+            core.ClearAttackTarget();
+
+            if (foe != null) {
+                float damage = core.Stats.Strength;
+                foe.TakeDamage(damage);
+                Debug.Log($"{core.characterData.characterName} → {foe.characterData.characterName} took {damage} ranged dmg!");
+            } else {
+                Debug.LogWarning($"{core.characterData.characterName} RangedAttack: No target selected or found!");
+            }
+        }
+
+
+        // Helper you can reuse for other actions too!
+        private CharacterCore FindNearestEnemy() {
+            var list = core.Targeting.GetActiveTargets();
+            CharacterCore nearest = null;
+            float minDist = float.MaxValue;
+            Vector3 me = core.transform.position;
+
+            foreach (var t in list) {
+                if (t.Tag == CharacterSO.factions.Enemy) {
+                    float d = Vector3.Distance(me, t.Position);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearest = t.Core;
+                    }
+                }
+            }
+            return nearest;
+        }
+
+
+        public void MeleeDodgeAttack() {
+
+        }
+
+        public void MeleeBlockAttack() {
+
+        }
+
+        public void MeleeStunAttack() {
+
+        }
+
+        public void MeleeKnockbackAttack() {
+
+        }
+
+        public void MeleeImmuneAttack() {
+
+        }
+
+        public void MeleeMultiAttack() {
+
+        }
+
+        public void MeleeJumpAttack() {
+
+        }
+
+        public void BasicRangedAttack() {
+            
+        }
+
+        public void RangedDodgeAttack() {
+
+        }
+
+        public void RangedBlockAttack() {
+
+        }
+
+        public void RangedMultiAttack() {
+            
         }
 
 
@@ -110,11 +190,12 @@ public class CharacterActions
             Debug.Log("UltimateAttack() is not yet implemented!");
         }
 
-        public void ComboAttack()
+        public void MultiAttack()
         {
             // TODO: Implement combo logic
-            Debug.Log("ComboAttack() is not yet implemented!");
+            Debug.Log("MultiAttack() is not yet implemented!");
         }
+
     }
 
     public class HealthActions
@@ -228,7 +309,11 @@ public class CharacterCore : MonoBehaviour
     public CharacterActions Actions { get; private set; }
     public CharacterStats Stats { get; private set; }
     public TargetingSystem Targeting { get; private set; }
-
+    public void SetAttackTarget(CharacterCore targetCore) {
+        attackTarget = targetCore;
+    }
+    public CharacterCore AttackTarget => attackTarget;
+    public void ClearAttackTarget() => attackTarget = null;
     /* ------------------------ Public Variables Section ------------------------ */
     [Header("Core Configuration")]
     [Tooltip("Assign the Character Scriptable Object to configure this character.")]
@@ -300,9 +385,13 @@ public class CharacterCore : MonoBehaviour
     public float maxHealth; // Character's maximum health
     private float currentHealth; // Character's current health
 
-    // **Public Property for Hurtbox Access**
+    // Public Property for Hurtbox Access
     public float Health => currentHealth;
+
+    // Tracks the character you explicitly chose to attack
+    private CharacterCore attackTarget;
     
+    /* --------------------------------- Methods -------------------------------- */
     private void Awake()
     {
         if (characterData == null)
