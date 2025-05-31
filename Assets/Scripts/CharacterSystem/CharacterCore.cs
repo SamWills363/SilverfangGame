@@ -1,89 +1,430 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MonoBehaviour))]
+[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Animator))]
+
+/// <summary>
+/// The Character Core Script Component is a glorified "character controller" with public 
+/// actions, for use in a MENU environment. It can be adapted for a PC-UI environment
+/// if needed to.
+/// 
+/// An API is exposed with the
+/// <c>
+/// public class CharacterActions {}
+/// </c>
+/// class for use with other scripts, items, and events.
+/// </summary>
+
+public class CharacterActions
+{
+    private CharacterCore core;
+
+    public MovementActions Movement { get; private set; }
+    public CombatActions Combat { get; private set; }
+    public HealthActions Health { get; private set; }
+    public ItemActions Items { get; private set; }
+
+    public CharacterActions(CharacterCore core)
+    {
+        this.core = core;
+
+        Movement = new MovementActions(core);
+        Combat = new CombatActions(core);
+        Health = new HealthActions(core);
+        Items = new ItemActions(core);
+    }
+
+    public class MovementActions
+    {
+        private CharacterCore core;
+
+        public MovementActions(CharacterCore core)
+        {
+            this.core = core;
+        }
+
+        public void ApproachNearestEnemy() => core.ApproachNearestEnemy();
+
+        public void MeleeApproach() => core.MeleeApproach();
+
+        public void RangedApproach() => core.RangedApproach();
+        
+        public void AerialApproach() => core.AerialApproach();
+
+        public void SetTarget(Transform target) => core.setTarget(target);
+    }
+
+    public class CombatActions
+    {
+        private CharacterCore core;
+
+        public CombatActions(CharacterCore core)
+        {
+            this.core = core;
+        }
+
+        public void SelectAttackTarget(CharacterCore targetCore) => core.SetAttackTarget(targetCore);
+
+        public void BasicMeleeAttack() {
+            // Grab all valid targets
+            var targets = core.Targeting.GetActiveTargets();
+
+            CharacterCore nearestEnemy = null;
+            float minDist = float.MaxValue;
+            Vector3 selfPos = core.transform.position;
+
+            // Find the closest Enemy
+            foreach (var t in targets) {
+                if (t.Tag == CharacterSO.factions.Enemy) {
+                    float dist = Vector3.Distance(selfPos, t.Position);
+                    if (dist < minDist) {
+                        minDist     = dist;
+                        nearestEnemy = t.Core;
+                    }
+                }
+            }
+
+            if (nearestEnemy != null) {
+                // Use Strength as damage (you can swap in any formula you like)
+                float damage = core.Stats.Strength; //Temporary!! CHANGE TO DYNAMIC
+                nearestEnemy.TakeDamage(damage);
+                Debug.Log($"{core.characterData.characterName} BasicMeleeAttack → " +
+                        $"{nearestEnemy.characterData.characterName} took {damage} damage!");
+            }
+            else {
+                Debug.Log($"{core.characterData.characterName} BasicMeleeAttack found no enemies!");
+            }
+        }
+
+        public void RangedAttack() {
+            CharacterCore foe = core.AttackTarget ?? FindNearestEnemy();
+            core.ClearAttackTarget();
+
+            if (foe != null) {
+                float damage = core.Stats.Strength;
+                foe.TakeDamage(damage);
+                Debug.Log($"{core.characterData.characterName} → {foe.characterData.characterName} took {damage} ranged dmg!");
+            } else {
+                Debug.LogWarning($"{core.characterData.characterName} RangedAttack: No target selected or found!");
+            }
+        }
+
+
+        // Helper you can reuse for other actions too!
+        private CharacterCore FindNearestEnemy() {
+            var list = core.Targeting.GetActiveTargets();
+            CharacterCore nearest = null;
+            float minDist = float.MaxValue;
+            Vector3 me = core.transform.position;
+
+            foreach (var t in list) {
+                if (t.Tag == CharacterSO.factions.Enemy) {
+                    float d = Vector3.Distance(me, t.Position);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearest = t.Core;
+                    }
+                }
+            }
+            return nearest;
+        }
+
+
+        public void MeleeDodgeAttack() {
+
+        }
+
+        public void MeleeBlockAttack() {
+
+        }
+
+        public void MeleeStunAttack() {
+
+        }
+
+        public void MeleeKnockbackAttack() {
+
+        }
+
+        public void MeleeImmuneAttack() {
+
+        }
+
+        public void MeleeMultiAttack() {
+
+        }
+
+        public void MeleeJumpAttack() {
+
+        }
+
+        public void BasicRangedAttack() {
+            
+        }
+
+        public void RangedDodgeAttack() {
+
+        }
+
+        public void RangedBlockAttack() {
+
+        }
+
+        public void RangedMultiAttack() {
+            
+        }
+
+
+        public void SpecialAttack()
+        {
+            // TODO: Implement special attack
+            Debug.Log("SpecialAttack() is not yet implemented!");
+        }
+
+        public void UltimateAttack()
+        {
+            // TODO: Implement ultimate attack
+            Debug.Log("UltimateAttack() is not yet implemented!");
+        }
+
+        public void MultiAttack()
+        {
+            // TODO: Implement combo logic
+            Debug.Log("MultiAttack() is not yet implemented!");
+        }
+
+    }
+
+    public class HealthActions
+    {
+        private CharacterCore core;
+
+        public HealthActions(CharacterCore core)
+        {
+            this.core = core;
+        }
+
+        public void TakeDamage(float amount) => core.TakeDamage(amount);
+
+        public void Heal(float amount) => core.Heal(amount);
+        
+        public float Current => core.Health;
+        
+        public bool IsDead => core.isDead;
+    }
+
+    public class ItemActions
+    {
+        private CharacterCore core;
+
+        public ItemActions(CharacterCore core)
+        {
+            this.core = core;
+        }
+
+        public void UseItem(string itemID)
+        {
+            // TODO: Add item usage logic
+            Debug.Log($"Using item: {itemID} (not implemented yet!)");
+        }
+
+        public void EquipItem(string itemID)
+        {
+            // TODO: Add equipment logic
+            Debug.Log($"Equipping item: {itemID} (not implemented yet!)");
+        }
+
+        public void UnequipItem(string itemID)
+        {
+            // TODO: Add unequip logic
+            Debug.Log($"Unequipping item: {itemID} (not implemented yet!)");
+        }
+    }
+
+
+}
+
+public class CharacterStats
+{
+    private CharacterCore core;
+
+    public StatusEffects Status { get; private set; }
+
+    public CharacterStats(CharacterCore core)
+    {
+        this.core = core;
+
+        Status = new StatusEffects(core);
+    }
+
+    public int Strength => core.Strength;
+    public int Dexterity => core.Dexterity;
+    public int Constitution => core.Constitution;
+    public int Intelligence => core.Intelligence;
+    public int Wisdom => core.Wisdom;
+    public int Charisma => core.Charisma;
+
+    public void ModifyStat(string statName, int delta)
+    {
+        switch (statName.ToLower())
+        {
+            case "strength":
+                core.SetStrength(core.Strength + delta);
+                break;
+            case "dexterity":
+                core.SetDexterity(core.Dexterity + delta);
+                break;
+            // add others as needed
+            default:
+                Debug.LogWarning($"Unknown stat: {statName}");
+                break;
+        }
+    }
+
+    public class StatusEffects
+    {
+        private CharacterCore core;
+
+        public StatusEffects(CharacterCore core)
+        {
+            this.core = core;
+        }
+
+        public void ApplyEffect(string effect)
+        {
+            Debug.Log($"Applying status effect: {effect}");
+            // TODO: Implement effect system
+        }
+    }
+    
+    public CharacterSO.factions Faction => core.characterData.faction;
+}
+
 public class CharacterCore : MonoBehaviour
 {
+    /* ------------------------------- API Setters ------------------------------ */
+    public CharacterActions Actions { get; private set; }
+    public CharacterStats Stats { get; private set; }
+    public TargetingSystem Targeting { get; private set; }
+    public void SetAttackTarget(CharacterCore targetCore) {
+        attackTarget = targetCore;
+    }
+    public CharacterCore AttackTarget => attackTarget;
+    public void ClearAttackTarget() => attackTarget = null;
+    /* ------------------------ Public Variables Section ------------------------ */
     [Header("Core Configuration")]
     [Tooltip("Assign the Character Scriptable Object to configure this character.")]
     public CharacterSO characterData;
 
     [Header("Audio Configuration")]
-    [Tooltip("List of sounds this character can play.")]
+    [Tooltip("These are the sounds that will be played by the character and their animations.")]
     public AudioClip[] soundClips;
 
-    // Animator reference
-    private Animator animator;
-
-    // Audio source reference
-    private AudioSource audioSource;
-
-    // Rigidbody reference for movement
-    private Rigidbody rb;
 
     [Header("Movement Configuration")]
+    [Tooltip("These configs alter motion speeds.")]
     public float moveSpeed = 5f;
     public LayerMask groundLayer;
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
+
+    [Header("Approach Configuration")]
+    [Tooltip("The approach speed whenever the Approach() is called.")]
+    public Vector3 target = new Vector3(0, 0, 0); // TODO: Change this to a real "target"
+    public float arrivalTime = 1;
+    public float approachSpeed = 5;
+    public float stopRadius = 0;
+
+    public enum approaches {
+        Melee,
+        Ranged,
+        Sky
+    }
+
+    // Character Stats - Read Access
+    public int Strength => strength;
+    public int Dexterity => dexterity;
+    public int Constitution => constitution;
+    public int Intelligence => intelligence;
+    public int Wisdom => wisdom;
+    public int Charisma => charisma;
+
+    public void SetStrength(int value) => strength = Mathf.Clamp(value, 0, 999);
+    public void SetDexterity(int value) => dexterity = Mathf.Clamp(value, 0, 999);
+    public void SetConstitution(int value) => constitution = Mathf.Clamp(value, 0, 999);
+    public void SetIntelligence(int value) => intelligence = Mathf.Clamp(value, 0, 999);
+    public void SetWisdom(int value) => wisdom = Mathf.Clamp(value, 0, 999);
+    public void SetCharisma(int value) => charisma = Mathf.Clamp(value, 0, 999);
+
+    [Header("Faction Alignment")]
+    [Tooltip("The faction this character belongs to (Friend/Enemy/Neutral)")]
+    public CharacterSO.factions Faction => characterData.faction;
+
+
+    /* ----------------------------- Private Section ---------------------------- */
+    private Animator animator;
+    private AudioSource audioSource;
+    private Rigidbody rb;
 
     private Vector3 movement;
     private bool isGrounded;
     private float lastMoveX = 0f;
     private float lastMoveZ = 0f;
 
-    // State to determine if the character is in combat
     private bool isInCombat;
+    public bool isDead = false;
 
     // Character stats
-    private int strength;
-    private int dexterity;
-    private int constitution;
-    private int intelligence;
-    private int wisdom;
-    private int charisma;
+    private int strength, dexterity, constitution, intelligence, wisdom, charisma;
 
-    // Health system
-    private float currentHP;
-    private float maxHP;
+    // Health System
+    [Header("Health System")]
+    public float maxHealth; // Character's maximum health
+    private float currentHealth; // Character's current health
 
+    // Public Property for Hurtbox Access
+    public float Health => currentHealth;
+
+    // Tracks the character you explicitly chose to attack
+    private CharacterCore attackTarget;
+    
+    /* --------------------------------- Methods -------------------------------- */
     private void Awake()
     {
         if (characterData == null)
         {
-            Debug.LogError("CharacterCore: No CharacterSO assigned! Assign a CharacterSO to configure this character.", this);
+            Debug.LogError("CharacterCore: No CharacterSO assigned!", this);
             return;
         }
 
         animator = GetComponent<Animator>();
-        if (animator == null)
-        {
-            Debug.LogError("CharacterCore: Animator component missing! Ensure an Animator is attached.", this);
-            return;
-        }
-
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            Debug.LogError("CharacterCore: AudioSource component missing! Ensure an AudioSource is attached.", this);
-            return;
-        }
-
         rb = GetComponent<Rigidbody>();
-        if (rb == null)
+
+        /*
+        if (animator == null || audioSource == null || rb == null)
         {
-            Debug.LogError("CharacterCore: Rigidbody component missing! Ensure a Rigidbody is attached.", this);
+            Debug.LogError("CharacterCore: Missing required components!", this);
             return;
         }
-
+        */
         InitializeCharacter();
+        InitializeAPI();
+     }
+
+    private void InitializeAPI() {
+        Actions = new CharacterActions(this);
+        Stats = new CharacterStats(this);
+        Targeting = new TargetingSystem(this);
     }
 
     private void InitializeCharacter()
     {
         Debug.Log($"Initializing character: {characterData.characterName}");
 
-        // Initialize stats from CharacterSO
         strength = characterData.strength;
         dexterity = characterData.dexterity;
         constitution = characterData.constitution;
@@ -91,196 +432,226 @@ public class CharacterCore : MonoBehaviour
         wisdom = characterData.wisdom;
         charisma = characterData.charisma;
 
-        maxHP = characterData.maxHP;
-        currentHP = maxHP;
+        maxHealth = characterData.maxHP;
+        currentHealth = maxHealth; // Set HP to full at start
 
-        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHP}/{maxHP}");
+        Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHealth}/{maxHealth}");
     }
 
-    public int CalculateSkillCheck(string skill)
+    public void TakeDamage(float damage)
     {
-        switch (skill.ToLower())
+        if (isDead) return;
+
+        currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ensure HP doesn't go below 0
+        Debug.Log($"{characterData.characterName} took {damage} damage! Remaining HP: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0)
         {
-            case "athletics":
-                return strength + GetModifier(strength);
-            case "acrobatics":
-            case "sleight of hand":
-            case "stealth":
-                return dexterity + GetModifier(dexterity);
-            case "arcana":
-            case "history":
-            case "investigation":
-            case "nature":
-            case "religion":
-                return intelligence + GetModifier(intelligence);
-            case "animal handling":
-            case "insight":
-            case "medicine":
-            case "perception":
-            case "survival":
-                return wisdom + GetModifier(wisdom);
-            case "deception":
-            case "intimidation":
-            case "performance":
-            case "persuasion":
-                return charisma + GetModifier(charisma);
-            default:
-                Debug.LogWarning($"Unknown skill: {skill}");
-                return 0;
+            OnDeath();
         }
     }
 
-    private int GetModifier(int stat)
+    public void Heal(float healAmount)
     {
-        return (stat - 10) / 2;
+        if (isDead) return;
+
+        currentHealth += healAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log($"{characterData.characterName} healed {healAmount}! Current HP: {currentHealth}/{maxHealth}");
     }
 
-    public void StatChange(AttributeSO[] stats)
+    public void OnDeath()
     {
-        foreach (var stat in stats)
+        if (isDead) return;
+        isDead = true;
+
+        Debug.Log($"{characterData.characterName} has died!");
+
+        // Play death animation
+        if (animator != null)
         {
-            switch (stat.type)
+            animator.SetTrigger("Die");
+        }
+
+        // Disable movement and combat
+        isInCombat = false;
+        moveSpeed = 0;
+
+        // Disable all colliders
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        // Disable all scripts except this one
+        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour script in scripts)
+        {
+            if (script != this)
             {
-                case AttributeSO.AttributeType.Stat:
-                    ApplyStatModification(stat);
-                    break;
-                case AttributeSO.AttributeType.Trait:
-                    ApplyTraitModification(stat);
-                    break;
-                case AttributeSO.AttributeType.Condition:
-                    ApplyConditionModification(stat);
-                    break;
-                default:
-                    Debug.LogWarning($"Unknown stat type: {stat.type}");
-                    break;
+                script.enabled = false;
             }
         }
-    }
 
-    private void ApplyStatModification(AttributeSO stat)
-    {
-        switch (stat.itemName.ToLower())
+        // Play death sound if available
+        if (soundClips.Length > 0)
         {
-            case "strength":
-                strength += Mathf.RoundToInt(stat.value);
-                break;
-            case "dexterity":
-                dexterity += Mathf.RoundToInt(stat.value);
-                break;
-            case "constitution":
-                constitution += Mathf.RoundToInt(stat.value);
-                break;
-            case "intelligence":
-                intelligence += Mathf.RoundToInt(stat.value);
-                break;
-            case "wisdom":
-                wisdom += Mathf.RoundToInt(stat.value);
-                break;
-            case "charisma":
-                charisma += Mathf.RoundToInt(stat.value);
-                break;
-            default:
-                Debug.LogWarning($"Unknown stat name: {stat.itemName}");
-                break;
-        }
-    }
-
-    private void ApplyTraitModification(AttributeSO trait)
-    {
-        Debug.Log($"Applying trait: {trait.itemName} with value {trait.value}");
-        // Implement trait-specific logic here
-    }
-
-    private void ApplyConditionModification(AttributeSO condition)
-    {
-        Debug.Log($"Applying condition: {condition.itemName} with value {condition.value}");
-        // Implement condition-specific logic here
-    }
-
-    private void Update()
-    {
-        if (isInCombat)
-        {
-            // Combat-specific movement logic can be added here in the future
-            return;
+            audioSource.PlayOneShot(soundClips[0]);
         }
 
-        // Overworld movement input
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-        movement = new Vector3(moveX, 0f, moveZ).normalized;
-
-        // Ground Check
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-
-        // Update last movement direction
-        if (movement.magnitude > 0)
-        {
-            lastMoveX = moveX;
-            lastMoveZ = moveZ;
-        }
-
-        // Animator Parameters
-        animator.SetBool("isWalking", movement.magnitude > 0);
-        animator.SetBool("isJumping", !isGrounded);
-        animator.SetFloat("moveX", moveX);
-        animator.SetFloat("moveZ", moveZ);
-
-        // Set Idle direction when movement stops
-        if (movement.magnitude == 0)
-        {
-            animator.SetFloat("idleX", lastMoveX);
-            animator.SetFloat("idleZ", lastMoveZ);
-        }
-
-        // Jump Input
-        if (isGrounded && Input.GetButtonDown("Jump"))
-        {
-            rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
-        }
+        // Destroy character after delay or trigger respawn logic
+        Destroy(gameObject, 3f);
     }
 
-    private void FixedUpdate()
+    public void setTarget(Transform targetObject) {
+        if (targetObject == null) return;
+        target = targetObject.position;
+    }
+
+    public void ApproachNearestEnemy() {
+            var targets = Targeting.GetActiveTargets();
+            CharacterCore closest = null;
+            float minDist = float.MaxValue;
+            Vector3 selfPos = transform.position;
+
+            foreach (var t in targets) {
+                if (t.Tag == CharacterSO.factions.Enemy) {
+                    float dist = Vector3.Distance(selfPos, t.Position);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = t.Core;
+                    }
+                }
+            }
+
+        if (closest != null) {
+            // Set their position as your approach target
+            setTarget(closest.transform);
+            MeleeApproach();
+        }
+        else {
+            Debug.LogWarning($"{characterData.characterName} ApproachNearestEnemy: No enemies found!");
+        }
+    }
+    
+    public void MeleeApproach() {
+
+        float meleeTime = 1;
+        float meleeStopRadius = 5;
+
+        Debug.Log("setAndRunApproach is being run!");
+        StartCoroutine(Approach(meleeTime, target, meleeStopRadius));
+    }
+
+    public void RangedApproach() {
+
+        float RangedTime = 2;
+        float RangedStopRadius = 30;
+
+        Debug.Log("setAndRunApproach is being run!");
+        StartCoroutine(Approach(RangedTime, target, RangedStopRadius));
+    }
+
+    public void AerialApproach() {
+
+        float AerialTime = 1;
+        float AerialStopRadius = 5;
+
+        Debug.Log("setAndRunApproach is being run!");
+        StartCoroutine(Approach(AerialTime, target, AerialStopRadius));
+    }
+
+    private IEnumerator Approach(float duration, Vector3 targetPosition, float stopRadius)
     {
-        if (isInCombat)
+        if (target == Vector3.zero) {
+            Debug.LogWarning("No target selected: Defaulting to target 0, 0, 0.");
+        }        
+
+        if (duration <= 0f)
         {
-            // Combat-specific physics logic can be added here in the future
-            return;
+            rb.MovePosition(targetPosition);
+            yield break;
         }
 
-        // Apply Movement
-        if (movement.magnitude > 0)
+        Vector3 startPosition = transform.position;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
         {
-            rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
-        }
-    }
+            elapsed += Time.deltaTime;
+            Debug.Log(elapsed + " : ms while approaching");
+            float t = Mathf.Clamp01(elapsed / duration);
+            Vector3 newPos = Vector3.Lerp(startPosition, targetPosition, t);
+            rb.MovePosition(newPos);
 
-    public bool IsInCombat()
-    {
-        return isInCombat;
-    }
+            // check if unit is within the stop radius.
+            if (Vector3.Distance(newPos, targetPosition) <= stopRadius)
+            {
+                yield break;
+            }
 
-    public void SetCombatState(bool state)
-    {
-        isInCombat = state;
-        animator.SetBool("IsInCombat", isInCombat);
-        Debug.Log($"Character {characterData.characterName} combat state set to: {isInCombat}");
-    }
-
-    public void PlaySound(int index)
-    {
-        if (soundClips == null || soundClips.Length <= index || index < 0)
-        {
-            Debug.LogError("CharacterCore: Invalid sound index or soundClips not assigned.");
-            return;
+            yield return null;
         }
 
-        audioSource.PlayOneShot(soundClips[index]);
-        Debug.Log($"Character {characterData.characterName} played sound: {soundClips[index].name}");
+        rb.MovePosition(targetPosition);
+    }
+}
+
+public class TargetingSystem {
+    private CharacterCore core;
+
+    public TargetingSystem(CharacterCore core) {
+        this.core = core;
     }
 
-    // Placeholder methods for manipulating character data (to be implemented later):
-    // public void SetHealth(float value) { /* Implementation */ }
-    // public void ModifySpeed(float modifier) { /* Implementation */ }
-    // public void ResetATB() { /* Implementation */ }
+    /// <summary>
+    /// Holds info about each valid target: its position and faction tag.
+    /// </summary>
+    public struct TargetInfo {
+        public CharacterCore Core;
+        public Vector3 Position;
+        public CharacterSO.factions Tag;
+    }
+
+    /// <summary>
+    /// Scans all CharacterCore instances in the scene and tags them Friend/Enemy/Neutral.
+    /// Defaults to Neutral if neither friend nor foe.
+    /// </summary>
+    public List<TargetInfo> GetActiveTargets() {
+        var list = new List<TargetInfo>();
+        var allCores = Object.FindObjectsByType<CharacterCore>(FindObjectsSortMode.None);
+        var myFaction = core.characterData.faction;
+
+        foreach (var other in allCores) {
+            if (other == core) continue;  // skip self
+
+            var theirFaction = other.characterData.faction;
+            CharacterSO.factions tag;
+
+            // Same non-neutral faction → Friend.
+            if (myFaction != CharacterSO.factions.Neutral && theirFaction == myFaction) {
+                tag = CharacterSO.factions.Friend;
+            }
+            // Both non-neutral and different → Enemy.
+            else if (myFaction != CharacterSO.factions.Neutral 
+                     && theirFaction != myFaction 
+                     && theirFaction != CharacterSO.factions.Neutral) {
+                tag = CharacterSO.factions.Enemy;
+            }
+            // Otherwise → Neutral.
+            else {
+                tag = CharacterSO.factions.Neutral;
+            }
+
+            list.Add(new TargetInfo {
+                Core     = other,
+                Position = other.transform.position,
+                Tag      = tag
+            });
+        }
+
+        return list;
+    }
 }
