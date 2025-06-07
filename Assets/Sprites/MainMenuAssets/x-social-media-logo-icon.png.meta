@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      x-social-media-logo-icon_0: -4315392406543245276
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

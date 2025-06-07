@@ -498,7 +498,21 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      StickSpriteCombatCapable-Sheet_0: -1816243339631169871
+      StickSpriteCombatCapable-Sheet_1: 298403366929967240
+      StickSpriteCombatCapable-Sheet_10: 1800935260503437622
+      StickSpriteCombatCapable-Sheet_11: 8743311072065271334
+      StickSpriteCombatCapable-Sheet_12: 8671155531162442952
+      StickSpriteCombatCapable-Sheet_13: -1835068231716450099
+      StickSpriteCombatCapable-Sheet_2: 8496150849992455892
+      StickSpriteCombatCapable-Sheet_3: -5323573952729833265
+      StickSpriteCombatCapable-Sheet_4: 2248880019737649272
+      StickSpriteCombatCapable-Sheet_5: -3061989205517323206
+      StickSpriteCombatCapable-Sheet_6: -6181681446192590933
+      StickSpriteCombatCapable-Sheet_7: 5134014503132742444
+      StickSpriteCombatCapable-Sheet_8: 8280138888608126774
+      StickSpriteCombatCapable-Sheet_9: 7845444135502768541
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
