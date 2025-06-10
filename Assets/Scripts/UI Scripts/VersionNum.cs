@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro; // Add this line to use TextMeshPro
+using TMPro;
 
 public class VersionDisplay : MonoBehaviour
 {

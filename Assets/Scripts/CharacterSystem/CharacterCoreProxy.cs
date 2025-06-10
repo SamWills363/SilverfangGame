@@ -7,6 +7,7 @@ using UnityEngine;
 public class CharacterCoreProxy : MonoBehaviour {
     private CharacterCore core;
 
+
     private void Awake() {
         // Find the core up in the hierarchy!!
         core = GetComponentInParent<CharacterCore>();
@@ -16,6 +17,9 @@ public class CharacterCoreProxy : MonoBehaviour {
     }
 
     // Animation Event–callable methods!!
+    public void OnStartUpEvent()  => core.RecordFrameData(EncounterSO.FrameType.StartUp);
+    public void OnActiveEvent()   => core.RecordFrameData(EncounterSO.FrameType.Active);
+    public void OnEndLagEvent()   => core.RecordFrameData(EncounterSO.FrameType.EndLag);
 
     /// <summary>
     /// Forwards to CharacterActions.Combat.BasicAttack() on the core

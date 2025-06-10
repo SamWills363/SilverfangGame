@@ -309,6 +309,10 @@ public class CharacterCore : MonoBehaviour
     public CharacterActions Actions { get; private set; }
     public CharacterStats Stats { get; private set; }
     public TargetingSystem Targeting { get; private set; }
+    public CombatManager.CombatActionType CurrentActionType { get; private set; }
+    public CharacterCore CurrentTarget { get; private set; }
+
+
     public void SetAttackTarget(CharacterCore targetCore) {
         attackTarget = targetCore;
     }
@@ -596,6 +600,29 @@ public class CharacterCore : MonoBehaviour
         }
 
         rb.MovePosition(targetPosition);
+    }
+
+    // called by CombatManager when queuing an action
+    public void PrepareAction(CombatManager.CombatActionType actionType, CharacterCore target)
+    {
+        CurrentActionType = actionType;
+        CurrentTarget    = target;
+        // trigger the Animator to play the clip whose name matches actionType
+        GetComponent<Animator>().Play(actionType.ToString());
+    }
+
+    // called by Animation Events
+    public void RecordFrameData(EncounterSO.FrameType frameType)
+    {
+        var cm        = CombatManager.Instance;
+        float ts      = Time.time - cm.TurnStartTime;
+        cm.CurrentEncounterSO.RecordFrame(
+            ts,
+            this,
+            CurrentActionType,
+            CurrentTarget,
+            frameType
+        );
     }
 }
 
