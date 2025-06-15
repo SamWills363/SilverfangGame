@@ -35,6 +35,19 @@ public class CombatManager : MonoBehaviour
 
     public enum CombatActionType { BasicMelee, Ranged, Special, Ultimate }
 
+    /// <summary>
+    /// Immediately drives an actor to animate the given action against the given target.
+    /// This will fire your Animation Events (and thus RecordFrameData).
+    /// </summary>
+    public void ExecutePlayerAction(CharacterCore actor, CharacterCore target, CombatActionType action)
+    {
+        // 1) enqueue for reveal if you still need RevealPhase logging
+        actionQueue.Add(new CombatActionRecord(Time.time, actor, action, target));
+
+        // 2) actually play the animation now
+        actor.PrepareAction(action, target);
+    }
+    
     private class CombatActionRecord
     {
         public float timestamp;
@@ -135,10 +148,11 @@ public class CombatManager : MonoBehaviour
             OnPlayerDecisionRequested?.Invoke(
                 p,
                 enemies.Where(e => !e.isDead).ToList(),
-                (type, target) =>
+                (type, tgt) =>
                 {
+                    Debug.Log($"[CM] callback fired: type={type}, target={(tgt?.name)}");
                     chosenType   = type;
-                    chosenTarget = target;
+                    chosenTarget = tgt;
                     choiceMade   = true;
                 }
             );

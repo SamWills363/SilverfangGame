@@ -327,6 +327,11 @@ public class CharacterCore : MonoBehaviour
     [Tooltip("These are the sounds that will be played by the character and their animations.")]
     public AudioClip[] soundClips;
 
+    [Header("Animators")]
+    [Tooltip("Handles transform-based states (Approach, Idle)")]
+    [SerializeField] private Animator unitAnimator;
+    [Tooltip("Handles pose states (Approaching, Shooting, Slide, Idle)")]
+    [SerializeField] private Animator poseAnimator;
 
     [Header("Movement Configuration")]
     [Tooltip("These configs alter motion speeds.")]
@@ -341,6 +346,7 @@ public class CharacterCore : MonoBehaviour
     public float arrivalTime = 1;
     public float approachSpeed = 5;
     public float stopRadius = 0;
+
 
     public enum approaches {
         Melee,
@@ -442,11 +448,19 @@ public class CharacterCore : MonoBehaviour
         Debug.Log($"Stats - STR: {strength}, DEX: {dexterity}, CON: {constitution}, INT: {intelligence}, WIS: {wisdom}, CHA: {charisma}, HP: {currentHealth}/{maxHealth}");
     }
 
+    void OnValidate()
+    {
+        // auto-assign if you forget in the Inspector
+        if (unitAnimator == null) unitAnimator = GetComponent<Animator>();
+        if (poseAnimator == null)
+            poseAnimator = GetComponentInChildren<Animator>(true);
+    }
+    
     public void TakeDamage(float damage)
     {
         if (isDead) return;
 
-        currentHealth -= damage;
+        currentHealth -= damage;    
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ensure HP doesn't go below 0
         Debug.Log($"{characterData.characterName} took {damage} damage! Remaining HP: {currentHealth}/{maxHealth}");
 
@@ -602,13 +616,37 @@ public class CharacterCore : MonoBehaviour
         rb.MovePosition(targetPosition);
     }
 
-    // called by CombatManager when queuing an action
+    /// <summary>
+    /// Called by CombatManager to both enqueue and play the action.
+    /// </summary>
     public void PrepareAction(CombatManager.CombatActionType actionType, CharacterCore target)
     {
         CurrentActionType = actionType;
-        CurrentTarget    = target;
-        // trigger the Animator to play the clip whose name matches actionType
-        GetComponent<Animator>().Play(actionType.ToString());
+        CurrentTarget     = target;
+
+        // **1) Play motion** on Unit Animator
+        switch (actionType)
+        {
+            case CombatManager.CombatActionType.BasicMelee:
+                unitAnimator.Play("Approach");
+                poseAnimator.Play("Approaching");
+                break;
+
+            case CombatManager.CombatActionType.Ranged:
+                // no movement, but swap pose to Shooting
+                poseAnimator.Play("Shooting");
+                break;
+
+            case CombatManager.CombatActionType.Special:
+                // example
+                poseAnimator.Play("Slide");
+                break;
+
+            default:
+                unitAnimator.Play("Idle");
+                poseAnimator.Play("Idle");
+                break;
+        }
     }
 
     // called by Animation Events
