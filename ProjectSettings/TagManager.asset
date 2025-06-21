@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - CombatMenu
+  - Door
   layers:
   - Default
   - TransparentFX

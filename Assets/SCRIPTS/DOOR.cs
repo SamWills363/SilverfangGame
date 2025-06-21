@@ -7,7 +7,6 @@ public class DOOR : MonoBehaviour
     [SerializeField] private GameObject doorCollision;
     [SerializeField] private Animator anim;
     private bool isDoorOpen;
-    private bool isPlayerinRange;
     void start()
     {
         //primitive as fuck but we ball
@@ -15,35 +14,21 @@ public class DOOR : MonoBehaviour
 
         //why move it normally when there's an in-engine animation function
         anim = GetComponent<Animator>();
-
-        
     }
-    //detects collision with player (this is why this script is put in an invisible object)
-    //primitive gaming
-    void OnTriggerEnter(Collider player)
+    public void DoorMovement()
     {
-        isPlayerinRange = true;
-    }
-    void OnTriggerExit(Collider player)
-    {
-        isPlayerinRange = false;
-    }
-    public void openDoor()
-    {
-        //how door opens (might need tweaking later but fuck it)
-        if (isDoorOpen == false && isPlayerinRange == true && Input.GetButtonDown("Interact"))
+        //how door opens/closes (might need tweaking later but fuck it)
+        if (isDoorOpen == false)
         {
             doorCollision.gameObject.GetComponent<Collider>().enabled = false;
             anim.Play("Open");
+            isDoorOpen = true;
         }
-    }
-    public void closeDoor()
-    {
-        //how door closes (might need tweaking later)
-        if (isDoorOpen == true && isPlayerinRange == false)
+        else if (isDoorOpen == true)
         {
-            doorCollision.gameObject.GetComponent<Collider>().enabled = true;
             anim.Play("Close");
+            doorCollision.gameObject.GetComponent<Collider>().enabled = true;
+            isDoorOpen = false;
         }
     }
 }

@@ -9,28 +9,19 @@ public class WARPDOOR : MonoBehaviour
     [SerializeField] private bool isSceneTransition;
     [SerializeField] private int sceneID;
     private bool isPlayerinRange;
-    //detects collision with player (this is why this script is put in an invisible object)
-    //primitive gaming
-    void OnTriggerEnter(Collider player)
-    {
-        isPlayerinRange = true;
-    }
-    void OnTriggerExit(Collider player)
-    {
-        isPlayerinRange = false;
-    }
-    public void inSceneTP()
+
+    public void InSceneTP()
     {
         //teleports in-scene
-        if (isSceneTransition == false && isPlayerinRange == true && Input.GetButtonDown("Interact"))
+        if (isSceneTransition == false)
         {
             player.transform.position = destination.transform.position;
         }
     }
-    public void loadSceneTP()
+    public void LoadSceneTP()
     {
         //teleports between scenes
-        if (isSceneTransition == true && isPlayerinRange == true && Input.GetButtonDown("Interact"))
+        if (isSceneTransition == true)
         {
             SceneManager.LoadScene(sceneID);
         }
